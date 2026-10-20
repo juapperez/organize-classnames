@@ -1,41 +1,35 @@
 import * as vscode from 'vscode';
+import { classEdits } from './sort';
+
+const CFG = 'organizeClassnames';
+
+function enabledFor(doc: vscode.TextDocument): boolean {
+  const cfg = vscode.workspace.getConfiguration(CFG, doc);
+  const langs = cfg.get<string[]>('languages', []);
+  return langs.includes(doc.languageId);
+}
+
+function editsFor(doc: vscode.TextDocument): vscode.TextEdit[] {
+  return classEdits(doc.getText()).map((e) =>
+    vscode.TextEdit.replace(new vscode.Range(doc.positionAt(e.start), doc.positionAt(e.end)), e.text));
+}
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Extension activated');
-	let disposable = vscode.workspace.onWillSaveTextDocument((event) => {
-		console.log(`Document will be saved: ${event.document.fileName}`);
-		if (event.document.languageId === 'html' || event.document.languageId === 'javascript' || event.document.languageId === 'typescript') {
-			event.waitUntil(sortClassNames(event.document));
-		}
-	});
-
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(
+    vscode.workspace.onWillSaveTextDocument((event) => {
+      const cfg = vscode.workspace.getConfiguration(CFG, event.document);
+      if (!cfg.get<boolean>('onSave', true) || !enabledFor(event.document)) return;
+      event.waitUntil(Promise.resolve(editsFor(event.document)));
+    }),
+    vscode.commands.registerCommand('organizeClassnames.sort', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return;
+      const edits = editsFor(editor.document);
+      if (!edits.length) { vscode.window.setStatusBarMessage('Class names already sorted', 2000); return; }
+      await editor.edit((b) => edits.forEach((e) => b.replace(e.range, e.newText)));
+      vscode.window.setStatusBarMessage(`Sorted ${edits.length} class attribute${edits.length === 1 ? '' : 's'}`, 2000);
+    }),
+  );
 }
 
-async function sortClassNames(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-	console.log(`Sorting class names for document: ${document.fileName}`); 
-	const text = document.getText();
-	const classRegex = /class(?:Name)?="([^"]*)"/g;
-
-	let edits: vscode.TextEdit[] = [];
-	let match: RegExpExecArray | null;
-
-	while ((match = classRegex.exec(text)) !== null) {
-		const [fullMatch, classList] = match;
-		const sortedClassList = classList.split(' ')
-			.filter(Boolean)
-			.sort()
-			.join(' ');
-
-		if (classList !== sortedClassList) {
-			const startPos = document.positionAt(match.index + 7);
-			const endPos = document.positionAt(match.index + fullMatch.length - 1);
-
-			edits.push(vscode.TextEdit.replace(new vscode.Range(startPos, endPos), sortedClassList));
-		}
-	}
-
-	return edits;
-}
-
-export function deactivate() { }
+export function deactivate() {}

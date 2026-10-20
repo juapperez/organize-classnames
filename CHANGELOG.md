@@ -1,9 +1,14 @@
-# Change Log
+# Changelog
 
-All notable changes to the "organize-classnames" extension will be documented in this file.
+## 0.1.0 — 2026-10-20
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Rewritten around a pure, tested sorter (`src/sort.ts`).
+- Handles `class` and `className` with double or single quotes; leaves JSX expressions (`className={…}`) alone.
+- New command **Organize ClassNames: Sort class names in this file**.
+- Settings: `organizeClassnames.onSave` (default on) and `organizeClassnames.languages` (default html, javascript, javascriptreact, typescript, typescriptreact, vue). Previously only html/javascript/typescript were handled and JSX/TSX files were skipped.
+- Stable, locale-independent order.
+- Packaged `.vsix` attached to the GitHub release.
 
-## [Unreleased]
+## 0.0.1
 
-- Initial release
+- Initial version: sort on save in HTML, JavaScript and TypeScript.
