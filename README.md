@@ -17,11 +17,13 @@ Why: on teams, class lists drift (`"p-4 flex mt-2 flex"` in one file, `"flex mt-
 
 ## Install
 
-Until it is on the Marketplace: download `organize-classnames-0.1.0.vsix` from the [latest release](https://github.com/juapperez/organize-classnames/releases) and run
+From the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=juapperez.organize-classnames), or:
 
 ```bash
-code --install-extension organize-classnames-0.1.0.vsix
+code --install-extension juapperez.organize-classnames
 ```
+
+A `.vsix` is also attached to each [GitHub release](https://github.com/juapperez/organize-classnames/releases).
 
 ## Settings
 
